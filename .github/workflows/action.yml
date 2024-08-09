@@ -20,7 +20,7 @@ jobs:
         version: 3.0.7
         account-tar: ${{ secrets.ACME_SH_ACCOUNT_TAR }}
         domains: cdn.zhullyb.top
-        arguments: --dns dns_cf
+        arguments: --dns dns_cf --force
         output-fullchain: output/fullchain.pem
         output-key: output/key.pem
         output-pfx: output/cdn.zhullyb.top.pfx
