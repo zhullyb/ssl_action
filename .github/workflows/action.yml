@@ -33,7 +33,7 @@ jobs:
       run: |
         TG_BOT_TOKEN="${{ secrets.TG_BOT_TOKEN }}"
         TG_CHAT_ID="${{ secrets.TG_CHAT_ID }}"
-        curl -s -X POST https://api.telegram.org/bot${TG_BOT_TOKEN}/sendDocument -F chat_id=${TG_CHAT_ID} -F document="@output/cdn.zhullyb.top_$(date +%Y%m%d).zip" -F caption="Password: ${{ env.RANDOM_PWD }}"
+        curl -s -X POST https://api.telegram.org/bot${TG_BOT_TOKEN}/sendDocument -F chat_id=${TG_CHAT_ID} -F document="@output/cdn.zhullyb.top_$(date +%Y%m%d).zip"
     - name: Deploy To Upyun
       uses: Menci/deploy-certificate-to-upyun@beta-v2
       with:
