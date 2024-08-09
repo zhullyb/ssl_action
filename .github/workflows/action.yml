@@ -11,8 +11,9 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Get Random pwd, save to env
-      run: echo "RANDOM_PWD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" >> $GITHUB_ENV
+    - name: Get Random uuid
+      run: |
+        echo "RANDOM_PWD=$(cat /proc/sys/kernel/random/uuid)" >> $GITHUB_ENV
     - name: Issue Certificate
       uses: Menci/acme@main
       with:
