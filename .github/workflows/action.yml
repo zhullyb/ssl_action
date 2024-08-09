@@ -14,22 +14,25 @@ jobs:
     - name: Get Random uuid
       run: |
         echo "RANDOM_PWD=$(cat /proc/sys/kernel/random/uuid)" >> $GITHUB_ENV
+    - name: Install acme.sh
+      run: curl https://get.acme.sh | sh
+    - name: Extract account files for acme.sh
+      run: |
+        echo "${{ secrets.ACME_SH_ACCOUNT_TAR }}" | base64 -d | tar -C ~/.acme.sh -xz
     - name: Issue Certificate
-      uses: Menci/acme@main
-      with:
-        version: 3.0.7
-        account-tar: ${{ secrets.ACME_SH_ACCOUNT_TAR }}
-        domains: cdn.zhullyb.top
-        arguments: --dns dns_cf --force
-        output-fullchain: output/fullchain.pem
-        output-key: output/key.pem
-        output-pfx: output/cdn.zhullyb.top.pfx
-        output-pfx-password: ${{ env.RANDOM_PWD }}
+      run: |
+        export CF_Token="${{ secrets.CF_TOKEN }}"
+        export CF_Zone_ID="${{ secrets.CF_ZONE_ID }}"
+        export CF_Account_ID="${{ secrets.CF_ACCOUNT_ID }}"
+        ~/.acme.sh/acme.sh --issue --dns dns_cf --force -d cdn.zhullyb.top --fullchain-file output/fullchain.pem --key-file output/key.pem
+    - name: zip Certificate
+      run: |
+        zip -j output/cdn.zhullyb.top_$(date +%Y%m%d).zip output/fullchain.pem output/key.pem
     - name: Push Certificate
       run: |
         TG_BOT_TOKEN="${{ secrets.TG_BOT_TOKEN }}"
         TG_CHAT_ID="${{ secrets.TG_CHAT_ID }}"
-        curl -s -X POST https://api.telegram.org/bot${TG_BOT_TOKEN}/sendDocument -F chat_id=${TG_CHAT_ID} -F document="@output/certificate.pfx" -F caption="Password: ${{ env.RANDOM_PWD }}"
+        curl -s -X POST https://api.telegram.org/bot${TG_BOT_TOKEN}/sendDocument -F chat_id=${TG_CHAT_ID} -F document="@output/cdn.zhullyb.top_$(date +%Y%m%d).zip" -F caption="Password: ${{ env.RANDOM_PWD }}"
     - name: Deploy To Upyun
       uses: Menci/deploy-certificate-to-upyun@beta-v2
       with:
