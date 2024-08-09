@@ -1,0 +1,41 @@
+name: Main
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 10 1 * *'
+
+jobs:
+  issue-push:
+    name: Issue && Push
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Get Random pwd, save to env
+      run: echo "RANDOM_PWD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" >> $GITHUB_ENV
+    - name: Issue Certificate
+      uses: Menci/acme@main
+      with:
+        version: 3.0.2
+        account-tar: ${{ secrets.ACME_SH_ACCOUNT_TAR }}
+        domains: cdn.zhullyb.top
+        arguments: --dns dns_cf
+        output-fullchain: output/fullchain.pem
+        output-key: output/key.pem
+        output-pfx: output/cdn.zhullyb.top.pfx
+        output-pfx-password: ${{ env.RANDOM_PWD }}
+    - name: Push Certificate
+      run: |
+        TG_BOT_TOKEN="${{ secrets.TG_BOT_TOKEN }}"
+        TG_CHAT_ID="${{ secrets.TG_CHAT_ID }}"
+        curl -s -X POST https://api.telegram.org/bot${TG_BOT_TOKEN}/sendDocument -F chat_id=${TG_CHAT_ID} -F document="@output/certificate.pfx" -F caption="Password: ${{ env.RANDOM_PWD }}"
+    - name: Deploy To Upyun
+      uses: Menci/deploy-certificate-to-upyun@beta-v2
+      with:
+        subaccount-username: ${{ secrets.UPYUN_SUBACCOUNT_USERNAME }}
+        subaccount-password: ${{ secrets.UPYUN_SUBACCOUNT_PASSWORD }}
+        fullchain-file: output/fullchain.pem
+        key-file: output/key.pem
+        domains: |
+          cdn.zhullyb.top
+        delete-unused-certificates: false
