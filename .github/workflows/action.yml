@@ -17,7 +17,7 @@ jobs:
     - name: Issue Certificate
       uses: Menci/acme@main
       with:
-        version: 3.0.2
+        version: 3.0.7
         account-tar: ${{ secrets.ACME_SH_ACCOUNT_TAR }}
         domains: cdn.zhullyb.top
         arguments: --dns dns_cf
