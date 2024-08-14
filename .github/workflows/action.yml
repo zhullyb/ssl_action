@@ -41,4 +41,4 @@ jobs:
         key-file: output/key.pem
         domains: |
           ${{ env.domain }}
-        delete-unused-certificates: false
+        delete-unused-certificates: true
