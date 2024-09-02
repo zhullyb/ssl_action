@@ -2,7 +2,7 @@ name: Main
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 10 1 * *'
+    - cron: '44 4 4 * *'  # Choose a unique time so CA won't get too much pressure. 
 
 env:
   domain: cdn.zhullyb.top
