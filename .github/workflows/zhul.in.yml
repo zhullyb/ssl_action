@@ -1,11 +1,11 @@
-name: cdn.zhullyb.top
+name: zhul.in
 on:
   workflow_dispatch:
   schedule:
     - cron: '44 4 4 * *'  # Choose a unique time so CA won't get too much pressure. 
 
 env:
-  domain: cdn.zhullyb.top
+  domain: zhul.in
 
 jobs:
   issue-push:
@@ -31,13 +31,15 @@ jobs:
         TG_BOT_TOKEN="${{ secrets.TG_BOT_TOKEN }}"
         TG_CHAT_ID="${{ secrets.TG_CHAT_ID }}"
         curl -s -X POST https://api.telegram.org/bot${TG_BOT_TOKEN}/sendDocument -F chat_id=${TG_CHAT_ID} -F document="@output/${{ env.domain }}_$(date +%Y%m%d).zip"
-    - name: Deploy To Upyun
-      uses: Menci/deploy-certificate-to-upyun@beta-v2
-      with:
-        subaccount-username: ${{ secrets.UPYUN_SUBACCOUNT_USERNAME }}
-        subaccount-password: ${{ secrets.UPYUN_SUBACCOUNT_PASSWORD }}
-        fullchain-file: output/${{ env.domain }}.cert
-        key-file: output/${{ env.domain }}.key
-        domains: |
-          ${{ env.domain }}
-        delete-unused-certificates: true
+    - name: Setup Deploy Private Key
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        mkdir -p ~/.ssh/
+        echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -p 8022 aliyunhk.cname.5435486.xyz >> ~/.ssh/known_hosts
+    - name: Deploy to VPS
+      run: |
+        scp -P 8022 output/${{ env.domain }}.cert root@aliyunhk.cname.5435486.xyz:/opt/ssl/${{ env.domain }}.cert
+        scp -P 8022 output/${{ env.domain }}.key root@aliyunhk.cname.5435486.xyz:/opt/ssl/${{ env.domain }}.key

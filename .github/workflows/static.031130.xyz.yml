@@ -21,9 +21,11 @@ jobs:
       run: |
         mkdir -p output
         ~/.acme.sh/acme.sh --renew --dns dns_cf --force -d ${{ env.domain }}
+        mv ~/.acme.sh/${{ env.domain }}_ecc/fullchain.cer output/${{ env.domain }}.cert
+        mv ~/.acme.sh/${{ env.domain }}_ecc/${{ env.domain }}.key output/${{ env.domain }}.key
     - name: zip Certificate
       run: |
-        zip -j output/${{ env.domain }}_$(date +%Y%m%d).zip ~/.acme.sh/${{ env.domain }}_ecc/fullchain.cer ~/.acme.sh/${{ env.domain }}_ecc/${{ env.domain }}.key
+        zip -j output/${{ env.domain }}_$(date +%Y%m%d).zip output/${{ env.domain }}.cert output/${{ env.domain }}.key
     - name: Push Certificate
       run: |
         TG_BOT_TOKEN="${{ secrets.TG_BOT_TOKEN }}"
@@ -34,8 +36,8 @@ jobs:
       with:
         subaccount-username: ${{ secrets.UPYUN_SUBACCOUNT_USERNAME }}
         subaccount-password: ${{ secrets.UPYUN_SUBACCOUNT_PASSWORD }}
-        fullchain-file: /home/runner/.acme.sh/${{ env.domain }}_ecc/fullchain.cer
-        key-file: /home/runner/.acme.sh/${{ env.domain }}_ecc/${{ env.domain }}.key
+        fullchain-file: output/${{ env.domain }}.cert
+        key-file: output/${{ env.domain }}.key
         domains: |
           ${{ env.domain }}
         delete-unused-certificates: true
