@@ -34,8 +34,8 @@ jobs:
       with:
         subaccount-username: ${{ secrets.UPYUN_SUBACCOUNT_USERNAME }}
         subaccount-password: ${{ secrets.UPYUN_SUBACCOUNT_PASSWORD }}
-        fullchain-file: ~/.acme.sh/${{ env.domain }}_ecc/fullchain.cer
-        key-file: ~/.acme.sh/${{ env.domain }}_ecc/static.031130.xyz.key
+        fullchain-file: /home/runner/.acme.sh/${{ env.domain }}_ecc/fullchain.cer
+        key-file: /home/runner/.acme.sh/${{ env.domain }}_ecc/static.031130.xyz.key
         domains: |
           ${{ env.domain }}
         delete-unused-certificates: true
