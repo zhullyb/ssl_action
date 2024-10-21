@@ -20,7 +20,7 @@ jobs:
     - name: Issue Certificate
       run: |
         mkdir -p output
-        ~/.acme.sh/acme.sh --issue --dns dns_cf --force -d ${{ env.domain }} --fullchain-file output/fullchain.pem --key-file output/key.pem
+        ~/.acme.sh/acme.sh --renew --dns dns_cf --force -d ${{ env.domain }} --fullchain-file output/fullchain.pem --key-file output/key.pem
     - name: zip Certificate
       run: |
         zip -j output/${{ env.domain }}_$(date +%Y%m%d).zip output/fullchain.pem output/key.pem
