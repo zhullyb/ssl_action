@@ -1,4 +1,4 @@
-name: Main
+name: static.031130.xyz
 on:
   workflow_dispatch:
   schedule:
