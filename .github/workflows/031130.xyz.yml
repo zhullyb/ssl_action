@@ -1,0 +1,42 @@
+name: 031130.xyz
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '44 4 4 * *'  # Choose a unique time so CA won't get too much pressure. 
+
+env:
+  domain: 031130.xyz
+
+jobs:
+  issue-push:
+    name: Issue && Push
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install acme.sh
+      run: curl https://get.acme.sh | sh
+    - name: Extract account files for acme.sh
+      run: |
+        echo "${{ secrets.ACME_SH_ACCOUNT_TAR }}" | base64 -d | tar -C ~/.acme.sh -xz
+    - name: Issue Certificate
+      run: |
+        mkdir -p output
+        ~/.acme.sh/acme.sh --renew --dns dns_cf --force -d ${{ env.domain }} -d *.${{ env.domain }}
+        mv ~/.acme.sh/${{ env.domain }}_ecc/fullchain.cer output/${{ env.domain }}.cert
+        mv ~/.acme.sh/${{ env.domain }}_ecc/${{ env.domain }}.key output/${{ env.domain }}.key
+    - name: zip Certificate
+      run: |
+        zip -j output/${{ env.domain }}_$(date +%Y%m%d).zip output/${{ env.domain }}.cert output/${{ env.domain }}.key
+    - name: Push Certificate
+      run: |
+        TG_BOT_TOKEN="${{ secrets.TG_BOT_TOKEN }}"
+        TG_CHAT_ID="${{ secrets.TG_CHAT_ID }}"
+        curl -s -X POST https://api.telegram.org/bot${TG_BOT_TOKEN}/sendDocument -F chat_id=${TG_CHAT_ID} -F document="@output/${{ env.domain }}_$(date +%Y%m%d).zip"
+    - name: Deploy to Tencent Cloud
+      uses: renbaoshuo/deploy-certificate-to-tencentcloud@v2
+      with:
+        secret-id: ${{ secrets.QCLOUD_SECRET_ID }}
+        secret-key: ${{ secrets.QCLOUD_SECRET_KEY }}
+        fullchain-file: output/${{ env.domain }}.cert
+        key-file: output/${{ env.domain }}.key
+        domains: |
+          ${{ env.domain }}
