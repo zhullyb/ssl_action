@@ -41,6 +41,6 @@ jobs:
         ssh-keyscan -p 8022 aliyunhk.cname.5435486.xyz >> ~/.ssh/known_hosts
     - name: Deploy to VPS
       run: |
-        scp -P 8022 output/${{ env.domain }}.cert root@aliyunhk.cname.5435486.xyz:/opt/ssl/${{ env.domain }}.cert
-        scp -P 8022 output/${{ env.domain }}.key root@aliyunhk.cname.5435486.xyz:/opt/ssl/${{ env.domain }}.key
-        ssh -P 8022 root@aliyunhk.cname.5435486.xyz "systemctl restart caddy"
+        chmod a+r output/${{ env.domain }}.key
+        rsync -e "ssh -p 8022" -avz output/${{ env.domain }}.cert output/${{ env.domain }}.key root@aliyunhk.cname.5435486.xyz:/opt/ssl/
+        ssh -p 8022 root@aliyunhk.cname.5435486.xyz "systemctl restart caddy"
