@@ -42,5 +42,5 @@ jobs:
     - name: Deploy to VPS
       run: |
         chmod a+r output/${{ env.domain }}.key
-        rsync -e "ssh -p 8022" -avz output/${{ env.domain }}.cert output/${{ env.domain }}.key root@aliyunhk.cname.5435486.xyz:/opt/ssl/
+        rsync -e "ssh -p 8022" -avz output/${{ env.domain }}.cert output/${{ env.domain }}.key root@dmitus.cname.5435486.xyz:/opt/ssl/
         ssh -p 8022 root@aliyunhk.cname.5435486.xyz "systemctl restart caddy"
