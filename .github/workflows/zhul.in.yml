@@ -38,9 +38,9 @@ jobs:
         mkdir -p ~/.ssh/
         echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -p 8022 aliyunhk.cname.5435486.xyz >> ~/.ssh/known_hosts
+        ssh-keyscan -p 8022 dmitus.cname.5435486.xyz >> ~/.ssh/known_hosts
     - name: Deploy to VPS
       run: |
         chmod a+r output/${{ env.domain }}.key
         rsync -e "ssh -p 8022" -avz output/${{ env.domain }}.cert output/${{ env.domain }}.key root@dmitus.cname.5435486.xyz:/opt/ssl/
-        ssh -p 8022 root@aliyunhk.cname.5435486.xyz "systemctl restart caddy"
+        ssh -p 8022 root@dmitus.cname.5435486.xyz "systemctl restart caddy"
